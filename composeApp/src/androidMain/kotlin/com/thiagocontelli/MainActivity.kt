@@ -1,4 +1,4 @@
-package org.example.project
+package com.thiagocontelli
 
 import App
 import android.os.Bundle
