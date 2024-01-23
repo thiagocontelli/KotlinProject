@@ -1,54 +1,80 @@
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.Habit
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlin.random.Random
 
-data class Habit(
-    val name: String,
-    val daysDone: List<String>
-)
-
+@OptIn(DelicateCoroutinesApi::class, ExperimentalMaterialApi::class)
 @Composable
-fun App() {
-    val habits = listOf(
-        Habit("Academia", listOf("Seg.", "Ter.", "Qui.")),
-        Habit("Meditação", listOf("Seg.", "Qua.", "Sex.")),
-        Habit("Leitura", listOf("Ter.", "Qui.", "Sáb.")),
-        Habit("Yoga", listOf("Seg.", "Qua.", "Sex.")),
-        Habit("2L de água", listOf("Seg.", "Ter.", "Qua.", "Qui.", "Sex.", "Sáb.", "Dom.")),
-        Habit("Planejar o dia na noite anterior", listOf("Seg.", "Ter.", "Qua.", "Qui.", "Sex.")),
-        Habit("Praticar gratidão diariamente", listOf("Seg.", "Ter.", "Qua.", "Qui.", "Sex.", "Sáb.", "Dom.")),
-        Habit("Acompanhar metas de curto e longo prazo", listOf("Seg.", "Ter.", "Qua.", "Qui.", "Sex.")),
-        Habit("Aprender algo novo regularmente", listOf("Ter.", "Qui.", "Sáb.")),
-        Habit("Manter uma dieta balanceada", listOf("Seg.", "Ter.", "Qua.", "Qui.", "Sex.")),
-        Habit("Estabelecer horários regulares de sono", listOf("Seg.", "Ter.", "Qua.", "Qui.", "Sex.", "Sáb.", "Dom.")),
-        Habit("Fazer pausas curtas durante o trabalho", listOf("Seg.", "Ter.", "Qua.", "Qui.", "Sex.")),
-        Habit("Cultivar relacionamentos positivos", listOf("Seg.", "Ter.", "Qua.", "Qui.", "Sex.", "Sáb.", "Dom.")),
-        Habit("Realizar revisões periódicas de progresso", listOf("Seg.", "Qua.", "Sex.")),
-        Habit("Praticar a empatia", listOf("Seg.", "Qua.", "Sex.")),
-        Habit("Limitar o tempo nas redes sociais", listOf("Seg.", "Ter.", "Qua.", "Qui.", "Sex.")),
-        Habit("Manter um ambiente limpo e organizado", listOf("Seg.", "Ter.", "Qua.", "Qui.", "Sex.", "Sáb.", "Dom.")),
-        Habit("Promover a sustentabilidade", listOf("Seg.", "Qua.", "Sex.")),
-        Habit("Expressar gratidão a outras pessoas", listOf("Seg.", "Qua.", "Sex.")),
-        Habit("Praticar mindfulness", listOf("Seg.", "Ter.", "Qua.", "Qui.", "Sex.", "Sáb.", "Dom.")),
-        Habit("Fazer uma pausa para reflexão no final do dia", listOf("Seg.", "Ter.", "Qua.", "Qui.", "Sex."))
-    )
+fun App(appModule: AppModule) {
+    val dataSource = appModule.provideDataSource()
+    var habits by remember {
+        mutableStateOf(emptyList<Habit>())
+    }
     val daysOfWeek = listOf("Dom.", "Seg.", "Ter.", "Qua.", "Qui.", "Sex.", "Sáb.")
 
+    fun getHabits() {
+        try {
+            GlobalScope.launch {
+                dataSource.getAll().collect { h ->
+                    habits = h
+                }
+            }
+        } catch(e: Exception) {
+
+        }
+    }
+
+    fun createHabit() {
+        GlobalScope.launch {
+            dataSource.insert("habit${Random.nextInt(1, 101)}")
+            getHabits()
+        }
+    }
+
+
+//    LaunchedEffect(true) {
+//        dataSource.deleteAll()
+//    }
+
     MaterialTheme {
+
         Scaffold(topBar = {
             TopAppBar(title = { Text("Olá, Thiago!") }, actions = {
-                IconButton(onClick = {}) {
+                IconButton(onClick = {
+                    createHabit()
+                }) {
                     Icon(Icons.Default.Add, contentDescription = "Adicionar hábito")
                 }
             })
@@ -72,7 +98,7 @@ fun App() {
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Text(
-                                        habit.name,
+                                        habit.createdAt.toString(),
                                         fontWeight = FontWeight.SemiBold,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
@@ -86,15 +112,15 @@ fun App() {
                                 }
                                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     items(daysOfWeek) { day ->
-                                        if (habit.daysDone.contains(day)) {
-                                            Button(onClick = {}) {
-                                                Text(day)
-                                            }
-                                        } else {
-                                            OutlinedButton(onClick = {}) {
-                                                Text(day)
-                                            }
-                                        }
+                                        //                                        if (habit.daysDone.contains(day)) {
+                                        //                                            Button(onClick = {}) {
+                                        //                                                Text(day)
+                                        //                                            }
+                                        //                                        } else {
+                                        //                                            OutlinedButton(onClick = {}) {
+                                        //                                                Text(day)
+                                        //                                            }
+                                        //                                        }
                                     }
                                 }
                             }

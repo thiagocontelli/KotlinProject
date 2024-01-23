@@ -5,12 +5,6 @@ import androidx.compose.ui.window.application
 
 fun main() = application {
     Window(onCloseRequest = ::exitApplication, title = "Ethos") {
-        App()
+        App(DesktopAppModule())
     }
-}
-
-@Preview
-@Composable
-fun AppDesktopPreview() {
-    App()
 }

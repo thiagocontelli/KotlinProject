@@ -1,0 +1,32 @@
+CREATE TABLE habit (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    createdAt INTEGER NOT NULL
+);
+
+CREATE TABLE day (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    createdAt INTEGER NOT NULL,
+    habitId INTEGER NOT NULL,
+    FOREIGN KEY (habitId) REFERENCES habit(id)
+);
+
+getHabits:
+SELECT * FROM habit;
+
+insertHabit:
+INSERT INTO habit (
+    id,
+    name,
+    createdAt
+) VALUES (?, ?, ?);
+
+deleteHabits:
+DELETE FROM habit;
+
+insertDay:
+INSERT INTO day (
+    id,
+    createdAt,
+    habitId
+) VALUES (?, ?, ?);
