@@ -21,9 +21,6 @@ INSERT INTO habit (
     createdAt
 ) VALUES (?, ?, ?);
 
-deleteHabits:
-DELETE FROM habit;
-
 insertDay:
 INSERT INTO day (
     id,

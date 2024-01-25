@@ -23,9 +23,9 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +39,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.Habit
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -72,6 +72,21 @@ fun App(appModule: AppModule) {
         "Ler 10 minutos por dia"
     )
 
+    suspend fun getHabits() {
+        dataSource.getAll().collect { habits = it }
+    }
+
+    suspend fun createHabit() {
+        dataSource.insert(habitName)
+        getHabits()
+    }
+
+    LaunchedEffect(true) {
+        coroutineScope {
+            getHabits()
+        }
+    }
+
     MaterialTheme {
         ModalBottomSheetLayout({
             Column(
@@ -94,7 +109,12 @@ fun App(appModule: AppModule) {
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
                 )
 
-                Button({ scope.launch { state.hide() } }, modifier = Modifier.fillMaxWidth()) {
+                Button({
+                    scope.launch {
+                        createHabit()
+                        state.hide()
+                    }
+                }, modifier = Modifier.fillMaxWidth()) {
                     Text("Salvar")
                 }
             }
@@ -130,11 +150,6 @@ fun App(appModule: AppModule) {
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis,
                                             modifier = Modifier.weight(1f, false)
-                                        )
-                                        Icon(
-                                            Icons.Default.Star,
-                                            contentDescription = "Categoria do hábito",
-                                            tint = MaterialTheme.colors.primary
                                         )
                                     }
                                     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

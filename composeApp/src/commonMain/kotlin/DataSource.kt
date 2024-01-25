@@ -13,8 +13,4 @@ class DataSource(db: Database) {
         val habits = queries.getHabits().executeAsList()
         emit(habits)
     }
-
-    fun deleteAll() {
-        queries.deleteHabits()
-    }
 }
